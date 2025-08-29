@@ -1,4 +1,4 @@
-package dev.hxrry.core.config;
+package dev.hxrry.hxcore.config;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

@@ -1,4 +1,4 @@
-package dev.hxrry.core.database;
+package dev.hxrry.hxcore.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

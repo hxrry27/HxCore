@@ -1,4 +1,4 @@
-package dev.hxrry.core.database;
+package dev.hxrry.hxcore.database;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;

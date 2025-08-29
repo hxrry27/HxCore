@@ -1,4 +1,4 @@
-package dev.hxrry.core.text;
+package dev.hxrry.hxcore.text;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

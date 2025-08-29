@@ -1,4 +1,4 @@
-package dev.hxrry.core.database;
+package dev.hxrry.hxcore.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,6 +8,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+//TODO: consider postgres to align with f1 projects
 
 public abstract class Database {
     // thread pool for async database operations

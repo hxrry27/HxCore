@@ -1,4 +1,4 @@
-package dev.hxrry.core.cache;
+package dev.hxrry.hxcore.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;

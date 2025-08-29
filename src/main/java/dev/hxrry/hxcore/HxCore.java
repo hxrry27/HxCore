@@ -1,10 +1,11 @@
-package dev.hxrry.core;
+package dev.hxrry.hxcore;
 
-import dev.hxrry.core.cache.CacheManager;
-import dev.hxrry.core.config.ConfigManager;
-import dev.hxrry.core.database.Database;
-import dev.hxrry.core.database.DatabaseFactory;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import dev.hxrry.hxcore.cache.CacheManager;
+import dev.hxrry.hxcore.config.ConfigManager;
+import dev.hxrry.hxcore.database.Database;
+import dev.hxrry.hxcore.database.DatabaseFactory;
 
 import java.util.HashMap;
 import java.util.Map;

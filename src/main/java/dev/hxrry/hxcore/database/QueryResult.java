@@ -1,4 +1,4 @@
-package dev.hxrry.core.database;
+package dev.hxrry.hxcore.database;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
