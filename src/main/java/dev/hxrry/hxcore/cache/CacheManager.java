@@ -18,23 +18,12 @@ public class CacheManager {
     private final Map<String, Cache<?, ?>> caches;
     private final boolean enableStats;
     
-    /**
-     * @param logger logger for debug output
-     * @param enableStats Whether to track cache statistics
-     */
     public CacheManager(Logger logger, boolean enableStats) {
         this.logger = logger;
         this.caches = new ConcurrentHashMap<>();
         this.enableStats = enableStats;
     }
 
-    /**
-     * @param name
-     * @param expireAfterWrite 
-     * @param expireAfterAccess null=never
-     * @param maxSize null=unlim
-     * @return the cache
-     */
     @SuppressWarnings("unchecked")
     public <K, V> Cache<K, V> createCache(String name, Duration expireAfterWrite, Duration expireAfterAccess, Integer maxSize) {
         
@@ -73,30 +62,15 @@ public class CacheManager {
         });
     }
 
-    /**
-     * @param name 
-     * @param ttlMinutes 
-     * @param maxSize max entries
-     */
     public <K, V> Cache<K, V> createSimpleCache(String name, int ttlMinutes, int maxSize) {
         return createCache(name, Duration.ofMinutes(ttlMinutes), null, maxSize);
     }
 
-    /**
-     * @param name cache name
-     * @return null if no cache
-     */
     @SuppressWarnings("unchecked")
     public <K, V> Cache<K, V> getCache(String name) {
         return (Cache<K, V>) caches.get(name);
     }
 
-    /**
-     * @param cacheName 
-     * @param key 
-     * @param loader
-     * @return
-     */
     public <K, V> V get(String cacheName, K key, Function<K, V> loader) {
         Cache<K, V> cache = getCache(cacheName);
         if (cache == null) {
@@ -107,10 +81,6 @@ public class CacheManager {
         return cache.get(key, loader);
     }
 
-    /**
-     * @param cacheName 
-     * @param key 
-     */
     public <K> void invalidate(String cacheName, K key) {
         Cache<K, ?> cache = getCache(cacheName);
         if (cache != null) {
@@ -119,9 +89,6 @@ public class CacheManager {
         }
     }
 
-    /**
-     * @param cacheName
-     */
     public void clearCache(String cacheName) {
         Cache<?, ?> cache = getCache(cacheName);
         if (cache != null) {
@@ -138,10 +105,6 @@ public class CacheManager {
         logger.info("Cleared all " + caches.size() + " caches");
     }
     
-    /**
-     * @param cacheName Cache name
-     * @return statistics or null
-     */
     // for debuggin
     public CacheStats getStats(String cacheName) {
         if (!enableStats) {

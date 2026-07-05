@@ -21,16 +21,11 @@ public class ConfigManager {
     private FileConfiguration config;
     private FileConfiguration defaults;
     
-    /**
-     * @param plugin the plugin
-     * @param fileName config file name (e.g., "config.yml", "messages.yml")
-     */
     public ConfigManager(JavaPlugin plugin, String fileName) {
         this.plugin = plugin;
         this.fileName = fileName;
         this.configFile = new File(plugin.getDataFolder(), fileName);
         
-        // load defaults from resources
         loadDefaults();
     }
     
@@ -41,7 +36,7 @@ public class ConfigManager {
         }
         
         // create config file if it doesn't exist
-        if (!configFile.exists()) {
+        if (!configFile.exists() && plugin.getResource(fileName) != null) {
             plugin.saveResource(fileName, false);
             plugin.getLogger().info("Created default " + fileName);
         }
@@ -84,8 +79,12 @@ public class ConfigManager {
     }
 
     private void checkVersion() {
+        if (defaults == null) {
+            return;
+        }
+        
         int currentVersion = config.getInt("config-version", 0);
-        int expectedVersion = defaults != null ? defaults.getInt("config-version", 1) : 1;
+        int expectedVersion = defaults.getInt("config-version", 1);
         
         if (currentVersion < expectedVersion) {
             plugin.getLogger().warning(fileName + " is outdated (v" + currentVersion + " -> v" + expectedVersion + ")");
@@ -137,9 +136,6 @@ public class ConfigManager {
         }
     }
     
-    // ====== Convenience Methods ======
-    
-    // raw file config - for complex operations
     public FileConfiguration getConfig() {
         if (config == null) {
             load();
@@ -147,44 +143,36 @@ public class ConfigManager {
         return config;
     }
     
-    // auto handles colour codes etc. 
     public String getColoredString(String path) {
         String value = getConfig().getString(path);
         return value != null ? value.replace('&', '§') : null;
     }
     
-    // gets a string with a default value
     public String getString(String path, String def) {
         return getConfig().getString(path, def);
     }
     
-    // gets an integer with a default value
     public int getInt(String path, int def) {
         return getConfig().getInt(path, def);
     }
 
-    // gets a boolean with a default value
     public boolean getBoolean(String path, boolean def) {
         return getConfig().getBoolean(path, def);
     }
     
-    //  gets a string list
     public List<String> getStringList(String path) {
         return getConfig().getStringList(path);
     }
     
-    // gets a config section
     public ConfigurationSection getSection(String path) {
         return getConfig().getConfigurationSection(path);
     }
     
-    // set and immediate save
     public void set(String path, Object value) {
         getConfig().set(path, value);
         save();
     }
     
-    // check if path exist
     public boolean has(String path) {
         return getConfig().contains(path);
     }

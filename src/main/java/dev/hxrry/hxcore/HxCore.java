@@ -50,24 +50,9 @@ public class HxCore {
             // load main config
             ConfigManager mainConfig = getConfig("config.yml");
             mainConfig.load();
-            
-
 
             // set debug mode
-            this.debug = mainConfig.getBoolean("debug", false);
-            
-            // initialize database
-            String dbName = plugin.getName().toLowerCase().replace(" ", "_");
-            database = DatabaseFactory.create(plugin, dbName);
-            
-            if (!DatabaseFactory.connectWithRetry(database, 3, 1000)) {
-                logger.severe("Failed to connect to database!");
-                return false;
-            }
-            
-            // initialize cache manager
-            boolean enableStats = mainConfig.getBoolean("cache.stats", false);
-            cacheManager = new CacheManager(logger, enableStats);
+            this.debug = mainConfig.getBoolean("debug", false);      
             
             logger.info("HxCore initialized successfully for " + plugin.getName());
             return true;
@@ -105,14 +90,23 @@ public class HxCore {
     
     public Database getDatabase() {
         if (database == null) {
-            throw new IllegalStateException("Database not initialized! Call initialize() first.");
+            String dbName = plugin.getName().toLowerCase().replace(" ", "_");
+            
+            Database db = DatabaseFactory.create(plugin, dbName);
+            
+            if (!DatabaseFactory.connectWithRetry(db, 3, 1000)) {
+                throw new IllegalStateException("Failed to connect to the database :(");
+            }
+            
+            database = db;
         }
         return database;
     }
     
     public CacheManager getCacheManager() {
         if (cacheManager == null) {
-            throw new IllegalStateException("Cache manager not initialized! Call initialize() first.");
+            boolean stats = getConfig("config.yml").getBoolean("cache.stats", false);
+            cacheManager = new CacheManager(logger, stats);
         }
         return cacheManager;
     }
