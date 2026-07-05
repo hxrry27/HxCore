@@ -24,24 +24,35 @@ public class HxCore {
     // settings
     private boolean debug;
 
-    /**
-     * @param plugin The plugin using HxCore
-     */
+    private static boolean isFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true; // means its foila cos this isn't ON paper or purpur or puffer etc.
+        } catch (ClassNotFoundException e) {
+            return false; // would like to hope this means its normal paper? ultimately just proves its NOT foila tho
+        }
+    }
+
     public HxCore(JavaPlugin plugin) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.configs = new HashMap<>();
     }
 
-    /** 
-     * @return true if successful
-     */
     public boolean initialize() {
         try {
+            // foila smelly
+            if (isFolia()) { 
+                logger.severe("We don't support Folia soz!");
+                return false;
+            }
+            
             // load main config
             ConfigManager mainConfig = getConfig("config.yml");
             mainConfig.load();
             
+
+
             // set debug mode
             this.debug = mainConfig.getBoolean("debug", false);
             
@@ -87,18 +98,11 @@ public class HxCore {
         logger.info("HxCore shut down for " + plugin.getName());
     }
     
-    /**
-     * @param fileName config file name (e.g., "messages.yml")
-     * @return config manager for that file
-     */
     public ConfigManager getConfig(String fileName) {
         return configs.computeIfAbsent(fileName, 
             name -> new ConfigManager(plugin, name));
     }
     
-    /**
-     * @return
-     */
     public Database getDatabase() {
         if (database == null) {
             throw new IllegalStateException("Database not initialized! Call initialize() first.");
@@ -106,9 +110,6 @@ public class HxCore {
         return database;
     }
     
-    /**
-     * @return
-     */
     public CacheManager getCacheManager() {
         if (cacheManager == null) {
             throw new IllegalStateException("Cache manager not initialized! Call initialize() first.");
@@ -116,23 +117,14 @@ public class HxCore {
         return cacheManager;
     }
     
-    /**
-     * @return the plugin
-     */
     public JavaPlugin getPlugin() {
         return plugin;
     }
     
-    /**
-     * @return true if debug mode on
-     */
     public boolean isDebug() {
         return debug;
     }
     
-    /**
-     * @param message
-     */
     public void debug(String message) {
         if (debug) {
             logger.info("[DEBUG] " + message);

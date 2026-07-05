@@ -10,12 +10,6 @@ import java.util.logging.Logger;
 // factory class creates the right db based off the config choices. the ONLY class plugins interact with for db's
 
 public class DatabaseFactory {
-    
-    /**
-     * @param plugin The plugin requesting a database
-     * @param databaseName Name for the database/file
-     * @return Configured database ready to connect
-     */
 
     public static Database create(JavaPlugin plugin, String databaseName) {
         Logger logger = plugin.getLogger();
@@ -48,9 +42,7 @@ public class DatabaseFactory {
 
     private static Database createPostgreSQL(ConfigurationSection config, Logger logger) {
         if (config == null) {
-            logger.severe("PostgreSQL selected but no configuration provided!");
-            logger.info("Falling back to SQLite");
-            return null;
+            throw new IllegalStateException("PostgreSQL selected but not setup in config, please amend");
         }
         
         // read config with defaults
@@ -99,13 +91,6 @@ public class DatabaseFactory {
     }
     
     //docker related optimisations ?
-
-    /**
-     * @param database 
-     * @param maxRetries 
-     * @param retryDelayMs 
-     * @return 
-     */
     public static boolean connectWithRetry(Database database, int maxRetries, long retryDelayMs) {
         Logger logger = Logger.getLogger("DatabaseFactory");
         
