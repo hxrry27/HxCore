@@ -48,7 +48,6 @@ public class SQLiteDatabase extends Database {
         
         config.setJdbcUrl("jdbc:sqlite:" + databaseFile.getAbsolutePath());
         
-        // sqlite only supports 1 connection at a time for writes but multiple reads are fine
         config.setMaximumPoolSize(1);
         
         // connection pool name for logs
@@ -56,16 +55,15 @@ public class SQLiteDatabase extends Database {
         
         // sqlite-specific optimizations
         config.addDataSourceProperty("journal_mode", "WAL"); 
-        config.addDataSourceProperty("synchronous", "NORMAL"); // balance of speed vs safety
+        config.addDataSourceProperty("synchronous", "NORMAL"); 
         config.addDataSourceProperty("cache_size", "10000");
         config.addDataSourceProperty("busy_timeout", "5000"); // ms
+        config.addDataSourceProperty("foreign_keys", "true");
         
         this.dataSource = new HikariDataSource(config);
         
-        // run optimization commands
+        // pure first connection log 
         try (Connection conn = dataSource.getConnection()) {
-            conn.prepareStatement("PRAGMA foreign_keys = ON").execute();
-            conn.prepareStatement("VACUUM").execute();
             logger.info("Connected to SQLite database: " + databaseFile.getName());
         }
     }
