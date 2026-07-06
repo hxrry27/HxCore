@@ -5,11 +5,15 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.command.brigadier.Commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 
 // End Goal Target to help plan out the API
 // HxCommand.create("prefix")
@@ -84,6 +88,8 @@ public class HxCommand {
             }
 
             for (Sub sub : subs) {
+                registerPermission(plugin, sub.perm());
+
                 @SuppressWarnings("null")
 				var subNode = Commands.literal(sub.name())
                     .requires(source -> source.getSender().hasPermission(sub.perm().node()));
@@ -116,5 +122,19 @@ public class HxCommand {
 
             event.registrar().register(root.build());
         });
+    }
+
+    private void registerPermission(JavaPlugin plugin, Perm perm) {
+        PermissionDefault bukkitDefault;
+        if (perm.def() == PermDefault.OP) {
+            bukkitDefault = PermissionDefault.OP;
+        } else {
+            bukkitDefault = PermissionDefault.TRUE;
+        }
+
+        var pluginManager = plugin.getServer().getPluginManager();
+        if (pluginManager.getPermission(perm.node()) == null) {
+            pluginManager.addPermission(new Permission(perm.node(), bukkitDefault));
+        }
     }
 }
