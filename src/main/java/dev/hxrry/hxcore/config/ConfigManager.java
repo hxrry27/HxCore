@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -90,9 +92,14 @@ public class ConfigManager {
             plugin.getLogger().warning(fileName + " is outdated (v" + currentVersion + " -> v" + expectedVersion + ")");
             
             // backup old config
-            File backup = new File(plugin.getDataFolder(), fileName + ".backup-v" + currentVersion);
-            configFile.renameTo(backup);
-            plugin.getLogger().info("Backed up old config to " + backup.getName());
+            try {
+                File backup = new File(plugin.getDataFolder(), fileName + ".backup-v" + currentVersion);
+                Files.move(configFile.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                plugin.getLogger().info("Backed up old config to " + backup.getName());
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to backup old config, continuing with existing until next boot: " + fileName, e);
+                return;
+            }
             
             // create new config with old values copied over
             plugin.saveResource(fileName, false);
