@@ -6,6 +6,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.command.brigadier.Commands;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 
 // End Goal Target to help plan out the API
 // HxCommand.create("prefix")
@@ -14,8 +18,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 //          perm("hxprefix.reload", OP),
 //          sender -> reload(sender))
 //     .sub("set",
-//          arg("colour", styleConfig.getColours()),
 //          perm("hxprefix.colour", ALL),
+//          arg("colour", styleConfig.getColours()),
 //          (sender, colour) -> setColour(sender, colour))
 //     .register(plugin);
 
@@ -53,7 +57,7 @@ public class HxCommand {
         subs.add(new Sub(name, perm, arg, null, action));
         return this;
     }
-    
+
     public static Arg arg(String name, List<String> completions) {
         return new Arg(name, completions);
     }
@@ -64,7 +68,53 @@ public class HxCommand {
         return new Perm(name, def);
     }
 
-    public void register(JavaPlugin plugin) {
-        //just a stubby boy for now
+    @SuppressWarnings("null")
+	public void register(JavaPlugin plugin) {
+        
+        plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            
+            @SuppressWarnings("null")
+			var root = Commands.literal(name);
+
+            if (action != null) {
+                root.executes(ctx -> {
+                    action.accept(ctx.getSource().getSender());
+                    return Command.SINGLE_SUCCESS;
+                });
+            }
+
+            for (Sub sub : subs) {
+                @SuppressWarnings("null")
+				var subNode = Commands.literal(sub.name())
+                    .requires(source -> source.getSender().hasPermission(sub.perm().node()));
+                
+                if (sub.arg() == null) {
+                    subNode.executes(ctx -> {
+                        sub.action().accept(ctx.getSource().getSender());
+                        return Command.SINGLE_SUCCESS;
+                    });
+                } else {
+                    @SuppressWarnings("null")
+					var argNode = Commands.argument(sub.arg().name(), StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            for (String option : sub.arg().completions()) {
+                                builder.suggest(option);
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(ctx -> {
+                            sub.argAction().accept(
+                                ctx.getSource().getSender(),
+                                StringArgumentType.getString(ctx, sub.arg().name()));
+                            return Command.SINGLE_SUCCESS;
+                        });
+
+                    subNode.then(argNode);
+                }
+                root.then(subNode);
+            }
+
+            event.registrar().register(root.build());
+        });
     }
 }
