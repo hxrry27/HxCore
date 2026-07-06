@@ -77,7 +77,7 @@ public class SQLiteDatabase extends Database {
     }
     
     @Override
-    public void disconnect() {
+    protected void closeDataSource() {
         if (dataSource != null && !dataSource.isClosed()) {
             try (Connection conn = dataSource.getConnection()) {
                 conn.prepareStatement("VACUUM").execute();

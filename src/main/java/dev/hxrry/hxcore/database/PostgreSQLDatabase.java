@@ -84,7 +84,7 @@ public class PostgreSQLDatabase extends Database {
     }
     
     @Override
-    public void disconnect() {
+    protected void closeDataSource() {
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
             logger.info("Disconnected from PostgreSQL database");

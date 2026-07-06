@@ -9,37 +9,33 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-//TODO: consider postgres to align with f1 projects
-
 public abstract class Database {
-    // thread pool for async database operations
-    private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
+    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     
     protected final String name;
     protected final Logger logger;
-    
-    /**
-     * @param name identifier for logging reasons
-     * @param logger 
-     */
 
     protected Database(String name, Logger logger) {
         this.name = name;
         this.logger = logger;
     }
 
+    protected abstract void closeDataSource();
+
     public abstract void connect() throws SQLException;
     
     public abstract Connection getConnection() throws SQLException;
     
-    public abstract void disconnect();
+    public final void disconnect() {
+        executor.close();
+        closeDataSource();
+
+    }
     
     // basically health check implementation atp
     public abstract boolean isConnected();
     
-    /**
-     * @param sql CREATE TABLE IF NOT EXISTS statement
-     */
     public void createTable(String sql) throws SQLException {
         // try-with-resources ensures connection and statement are closed
         try (Connection conn = getConnection();
@@ -48,12 +44,6 @@ public abstract class Database {
             logger.info("Ensured table exists for: " + name);
         }
     }
-    
-    /**
-     * @param sql sql query with ? placeholders
-     * @param params values to replace ? with
-     * @return future containing query results
-     */
 
     public CompletableFuture<QueryResult> queryAsync(String sql, Object... params) {
         return CompletableFuture.supplyAsync(() -> {
@@ -73,7 +63,7 @@ public abstract class Database {
                 logger.severe("Query failed: " + sql);
                 throw new RuntimeException(e);
             }
-        }, EXECUTOR);
+        }, executor);
     }
     
     public CompletableFuture<Integer> updateAsync(String sql, Object... params) {
@@ -92,7 +82,7 @@ public abstract class Database {
                 logger.severe("Update failed: " + sql);
                 throw new RuntimeException(e);
             }
-        }, EXECUTOR);
+        }, executor);
     }
     
     public CompletableFuture<Void> transactionAsync(TransactionCallback callback) {
@@ -126,7 +116,7 @@ public abstract class Database {
                     }
                 }
             }
-        }, EXECUTOR);
+        }, executor);
     }
     
     @FunctionalInterface
