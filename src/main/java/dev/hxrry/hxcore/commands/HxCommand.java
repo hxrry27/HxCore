@@ -24,6 +24,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 public class HxCommand {
 
     private final String name;
+    private Perm rootPerm;
     private Consumer<CommandSender> action;
     private Arg rootArg;
     private BiConsumer<CommandSender, String> rootArgAction;
@@ -35,6 +36,12 @@ public class HxCommand {
 
     public static HxCommand create(String name) {
         return new HxCommand(name);
+    }
+
+    // gates the whole command, root and subs alike
+    public HxCommand permission(Perm perm) {
+        this.rootPerm = perm;
+        return this;
     }
 
     public HxCommand executes(Consumer<CommandSender> action) {
@@ -116,6 +123,11 @@ public class HxCommand {
         plugin.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
 
             var root = Commands.literal(name);
+
+            if (rootPerm != null) {
+                registerPermission(plugin, rootPerm);
+                root.requires(source -> source.getSender().hasPermission(rootPerm.node()));
+            }
 
             if (action != null) {
                 root.executes(ctx -> {
