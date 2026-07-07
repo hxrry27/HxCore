@@ -25,6 +25,8 @@ public class HxCommand {
 
     private final String name;
     private Consumer<CommandSender> action;
+    private Arg rootArg;
+    private BiConsumer<CommandSender, String> rootArgAction;
     private final List<Sub> subs = new ArrayList<>();
 
     private HxCommand(String name) {
@@ -37,6 +39,13 @@ public class HxCommand {
 
     public HxCommand executes(Consumer<CommandSender> action) {
         this.action = action;
+        return this;
+    }
+
+    // a blank directly after the command name, no sub-word: /colour red
+    public HxCommand executes(Arg arg, BiConsumer<CommandSender, String> action) {
+        this.rootArg = arg;
+        this.rootArgAction = action;
         return this;
     }
 
@@ -113,6 +122,17 @@ public class HxCommand {
                     action.accept(ctx.getSource().getSender());
                     return Command.SINGLE_SUCCESS;
                 });
+            }
+
+            if (rootArg != null) {
+                var rootArgNode = argNode(rootArg)
+                    .executes(ctx -> {
+                        rootArgAction.accept(
+                            ctx.getSource().getSender(),
+                            StringArgumentType.getString(ctx, rootArg.name()));
+                        return Command.SINGLE_SUCCESS;
+                    });
+                root.then(rootArgNode);
             }
 
             for (Sub sub : subs) {
