@@ -150,11 +150,6 @@ public class ConfigManager {
         return config;
     }
     
-    public String getColoredString(String path) {
-        String value = getConfig().getString(path);
-        return value != null ? value.replace('&', '§') : null;
-    }
-    
     public String getString(String path, String def) {
         return getConfig().getString(path, def);
     }
